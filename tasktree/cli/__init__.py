@@ -1,23 +1,25 @@
 """Command line interface for task_tree project."""
 import sys
 import argparse
+from anytree.importer import JsonImporter
+from anytree import RenderTree
+
 from core import Task
 from store import JsonStore, store
 
 shift_step = 4
 
-def tree_printer(root, shift):
-    if shift != 0:
-        print(f"└{shift*'-'}", end='')
-    print(root.title)
-
-    for child in root.childs:
-        print(' ' * (shift + 1), end='')
-        print(f"└{shift*'-'}{child.title}")
-        if child.childs:
-            tree_printer(child, shift + shift_step)
+def tree_printer(path):
+    with open(path, 'r') as f:
+        data = f.read()
+        importer = JsonImporter()
+        root = importer.import_(data)
+        print(RenderTree(root))
 
 def find_task(root, title):
+    if not root:
+        return None
+
     if root.title == title:
         return root
 
@@ -44,19 +46,25 @@ def arg_parser():
             break
         elif arg == 'tree':
             # display existing tree in terminal
-            with store:
-                root = store.get_tree(id=0)
-                tree_printer(root, 0)
+            tree_printer(store.store)
 
         elif arg == 'del':
             try:
                 title = args[pos + 1]
             except Exception:
-                return "No title for taske deletion provided. Abort deletion!"
+                print("No title for taske deletion provided. Abort deletion!")
+                return
 
             with store:
                 root = store.get_tree(id =0)
                 task  = find_task(root, title)
+
+                if not task:
+                    print("Can't find task with provided title")
+                    return
+
+                
+
 
 
 
