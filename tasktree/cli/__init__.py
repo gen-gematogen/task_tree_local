@@ -104,7 +104,8 @@ def arg_parser():
 
 
 
-if __name__ == "__main__":
-    print("Can't execute package directly")
-else:
-    arg_parser()
+#if __name__ == "__main__":
+#    print("Can't execute package directly")
+#else:
+#    arg_parser()
+arg_parser()
