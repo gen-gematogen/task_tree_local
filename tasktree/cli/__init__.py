@@ -17,6 +17,18 @@ def tree_printer(root, shift):
         if child.childs:
             tree_printer(child, shift + shift_step)
 
+def find_task(root, title):
+    if root.title == title:
+        return root
+
+    for child in root.childs:
+        res = find_task(child, title)
+
+        if res:
+            return res
+ 
+    return None
+
 
 def arg_parser():
     """Look through all given arguments, check it's correctness
@@ -51,6 +63,6 @@ def arg_parser():
 
 
 if __name__ == "__main__":
-    print("Can't execute package directly"
+    print("Can't execute package directly")
 else:
     arg_parser()
