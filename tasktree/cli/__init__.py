@@ -23,7 +23,7 @@ def find_task(root, title):
     if root.title == title:
         return root
 
-    for child in root.childs:
+    for child in root.children:
         res = find_task(child, title)
 
         if res:
@@ -37,35 +37,56 @@ def arg_parser():
     and if posslible execute given request"""
 
     parser = argparse.ArgumentParser()
-    args = parser.parse_args()
+    parser.add_argument('prog')
+    parser.add_argument('comand')
+    parser.add_argument('title_')
+    parser.add_argument(['--parent', '-p'], nargs='?')
+    parser.add_argument(['--status', '-s'], nargs='?')
+    parser.add_argument(['--title', '-t'], nargs='?')
+    
+    try:
+        args = parser.parse_args()
+    except Exception:
+        print("Wrong arguments provided. See help for better understanding.")
 
-    for pos, arg in enumerate(args):
-        if arg == 'shell':
+    match args.comand:
+        case 'shell':
             # change execution mode to shell
-            
-            break
-        elif arg == 'tree':
+            return
+        case 'tree':
             # display existing tree in terminal
             tree_printer(store.store)
-
-        elif arg == 'del':
-            try:
-                title = args[pos + 1]
-            except Exception:
-                print("No title for taske deletion provided. Abort deletion!")
-                return
-
+        case 'del':
             with store:
-                root = store.get_tree(id =0)
-                task  = find_task(root, title)
+                root = store.get_tree(id=0)
+                task = find_task(root, args.title_)
 
                 if not task:
                     print("Can't find task with provided title")
                     return
+                if task.parent:
+                    parent = task.parent
+                    parent.remove_child_by_id(task.id)
+                else:
+                    root = None
+            
+                store.save_tree(root)
+        
+        case 'edit':
+            with store:
+                root = store.get_tree(id=0)
+                task = find_task(root, args.title_)
 
-                
+                if args.parent:
+                    task.parent.children = tuple(i for i  in task.parent.children if i != task)
+                    task.parent = args.parent
+                    task.parent.children = tuple(list(task.parent.children).append(task))
+                if args.status:
+                    task.status = args.status
+                if args.title:
+                    task.title = args.title
 
-
+                store.save_tree(root)
 
 
 
