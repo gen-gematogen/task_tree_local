@@ -79,12 +79,25 @@ def arg_parser():
 
                 if args.parent:
                     task.parent.children = tuple(i for i  in task.parent.children if i != task)
-                    task.parent = args.parent
+                    task.parent = find_task(root, args.parent)
                     task.parent.children = tuple(list(task.parent.children).append(task))
                 if args.status:
                     task.status = args.status
                 if args.title:
                     task.title = args.title
+
+                store.save_tree(root)
+
+        case 'add':
+            with store:
+                root = store.get_tree(id=0)
+                new_task = Task(args.title_)
+
+                if args.parent:
+                    new_task.parent = find_task(root, args.parent)
+                    new_task.parent.children = tuple(list(new_task.parent.children).append(new_task))
+                if args.status:
+                    new_task.status = args.status
 
                 store.save_tree(root)
 
